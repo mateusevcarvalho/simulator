@@ -39,9 +39,30 @@ class InstitutionsController extends Controller
                 return $a['parcelas'] > $b['parcelas'];
             });
 
-            array_push($response, [
-                $institution['chave'] => $dataInstitutions
-            ]);
+            $response[$institution['chave']] = $dataInstitutions;
+        }
+
+        if (is_array($formData['instituicoes']) && count($formData['instituicoes'])) {
+            $newResponse = [];
+            foreach ($formData['instituicoes'] as $institution) {
+                $newResponse[$institution] = $response[$institution];
+            }
+            $response = $newResponse;
+        }
+
+        if ($formData['parcela']) {
+            $newResponse = [];
+            $keys = array_keys($response);
+            foreach ($keys as $key) {
+                $data = $response[$key];
+                $dataFilter = array_filter($data, function ($item) use ($formData) {
+                    return $item['parcelas'] === $formData['parcela'];
+                });
+
+                $newResponse[$key] = $dataFilter;
+            }
+
+            $response = $newResponse;
         }
 
         return response()->json($response);
